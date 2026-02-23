@@ -1,0 +1,4 @@
+.env
+cookies.json
+zvec_data/
+__pycache__/

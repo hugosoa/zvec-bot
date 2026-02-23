@@ -1,0 +1,14 @@
+services:
+  mon-bot:
+    # 1. On construit l'image (une seule fois au début)
+    build: .
+    
+    # 2. Le Volume (Le Miroir)
+    # "Le dossier actuel sur mon Mac (.)" = "Le dossier /app dans le Docker"
+    volumes:
+      - .:/app
+    
+    # 3. Ta clé Discord (pour ne pas la mettre dans le code)
+    environment:
+      - WEBHOOK_URL=${WEBHOOK_URL}
+    command: python bot.py
