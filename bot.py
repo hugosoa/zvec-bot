@@ -67,25 +67,30 @@ print("✅ Cerveau Zvec opérationnel.", flush=True)
 import json
 
 async def login():
-    print("🍪 Tentative de connexion via cookies.json...", flush=True)
+    # 1. On essaie d'abord de lire la variable d'environnement (pour le VPS/Coolify)
+    cookies_env = os.getenv("COOKIES")
+    
     try:
-        if os.path.exists('cookies.json'):
-            # 1. On lit le fichier que tu viens de créer
+        if cookies_env:
+            print("🍪 Chargement des cookies via variable d'environnement...", flush=True)
+            cookies_list = json.loads(cookies_env)
+        elif os.path.exists('cookies.json'):
+            # 2. Si pas de variable, on cherche le fichier (pour ton test local sur Mac)
+            print("🍪 Chargement des cookies via cookies.json...", flush=True)
             with open('cookies.json', 'r') as f:
                 cookies_list = json.load(f)
-            
-            # 2. On le transforme en dictionnaire simple (nom: valeur)
-            # C'est ce que Twikit attend vraiment
-            cookies_dict = {c['name']: c['value'] for c in cookies_list}
-            
-            # 3. On injecte les cookies dans le client
-            client.set_cookies(cookies_dict)
-            print("✅ Session chargée avec succès ! Plus besoin de login.", flush=True)
         else:
-            print("❌ ERREUR : Le fichier cookies.json est introuvable !", flush=True)
+            print("❌ ERREUR : Aucun cookie trouvé (Variable ENV ou fichier) !", flush=True)
+            return
+
+        # Transformation en dictionnaire pour Twikit
+        cookies_dict = {c['name']: c['value'] for c in cookies_list}
+        client.set_cookies(cookies_dict)
+        print("✅ Session chargée avec succès !", flush=True)
+        
     except Exception as e:
         print(f"❌ Erreur lors du chargement des cookies : {e}", flush=True)
-
+        
 def envoyer_discord(tweet_text, tweet_link):
     """Envoie la notification sur ton serveur"""
     payload = {
@@ -131,7 +136,7 @@ async def chercher_tweets():
                 
             if tweet.id in DEJA_ENVOYES: 
                 continue
-            
+
             await analyser_et_notifier(tweet)
             
     except Exception as e:
